@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14213D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="十月旅程">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>我的旅程</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&family=Noto+Serif:wght@600;800&family=Noto+Serif+TC:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F2F4F6; --card:#FFFFFF; --ink:#14213D; --text:#1D2431; --muted:#5B6576; --hair:#DCE1E7; --soft:#EBEFF3;
+  --sight:#4C7A47; --food:#A97508; --move:#2C5DA8; --stay:#6B4F8E; --shu:#CF3B26;
+  --disp:"Barlow Semi Condensed","Bahnschrift SemiCondensed","Bahnschrift","Arial Narrow","PingFang HK","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+  --body:"Barlow","Bahnschrift",system-ui,-apple-system,"Segoe UI","PingFang HK","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+  --min:"Noto Serif","Noto Serif TC","Songti TC","PMingLiU",Georgia,serif;
+  --goth:"Barlow",system-ui,-apple-system,"Segoe UI","PingFang HK","Noto Sans TC",sans-serif;
+  --lift:0 2px 4px rgba(20,33,61,.06),0 18px 40px -18px rgba(20,33,61,.35);
+}
+@media (prefers-color-scheme:dark) {
+  :root { --bg:#0C1322; --card:#151E33; --ink:#E8EDF6; --text:#E1E6EE; --muted:#98A3B5; --hair:#253049; --soft:#1C2740;
+    --sight:#86B97E; --food:#E2AE3E; --move:#7EA6EC; --stay:#B49AD6; --shu:#FF6A4D; --lift:0 18px 40px -18px rgba(0,0,0,.8); }
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--bg); color:var(--text); font:400 16px/1.5 var(--body); padding-bottom:calc(96px + env(safe-area-inset-bottom)); }
+button { font:inherit; color:inherit; cursor:pointer; background:none; border:0; padding:0; }
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--move); outline-offset:2px; border-radius:8px; }
+.ic { flex:none; display:block; }
+.wrap { max-width:560px; margin:0 auto; padding:0 20px; }
+.jp-min { font-family:var(--min); font-weight:600; }
+
+/* ── Sky hero: the one memorable thing ── */
+.sky { position:relative; overflow:hidden; color:#fff; min-height:372px; padding-top:calc(16px + env(safe-area-inset-top)); background:var(--sky); }
+.sky[data-phase=dawn]  { --sky:linear-gradient(180deg,#4F5F9C 0%,#B98CA9 52%,#F2C29B 100%); }
+.sky[data-phase=day]   { --sky:linear-gradient(180deg,#2F6CB0 0%,#6FA6DA 55%,#B9D7EE 100%); }
+.sky[data-phase=dusk]  { --sky:linear-gradient(180deg,#262B5C 0%,#7A4677 48%,#E47F55 100%); }
+.sky[data-phase=night] { --sky:linear-gradient(180deg,#060B1C 0%,#111C42 58%,#26366A 100%); }
+.sky[data-phase=night]::before { content:""; position:absolute; inset:0; opacity:.8;
+  background-image:radial-gradient(1.2px 1.2px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 34% 8%,#fff 50%,transparent 51%),
+  radial-gradient(1.4px 1.4px at 58% 26%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 76% 12%,#fff 50%,transparent 51%),
+  radial-gradient(1px 1px at 88% 34%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 22% 42%,#fff 50%,transparent 51%),
+  radial-gradient(1px 1px at 46% 50%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 67% 44%,#fff 50%,transparent 51%); }
+.orb { position:absolute; border-radius:50%; z-index:0; pointer-events:none; }
+.sky[data-phase=dusk] .orb, .sky[data-phase=dawn] .orb { width:150px; height:150px; left:26%; bottom:-6px; background:radial-gradient(circle,#FFE3B8 0 34%,#F6A56A 35% 46%,rgba(246,165,106,0) 70%); }
+.sky[data-phase=day] .orb { width:220px; height:220px; right:-50px; top:-40px; background:radial-gradient(circle,rgba(255,255,255,.75) 0 18%,rgba(255,255,255,0) 70%); }
+.sky[data-phase=night] .orb { width:30px; height:30px; left:58%; top:70px; box-shadow:-7px 4px 0 0 #F4EBD0; }
+.city-jp { position:absolute; z-index:1; right:14px; top:calc(92px + env(safe-area-inset-top)); writing-mode:vertical-rl; text-orientation:upright;
+  font:800 84px/1 var(--min); letter-spacing:.04em; color:rgba(255,255,255,.92); text-shadow:0 4px 30px rgba(0,0,0,.18); }
+.skyline { position:absolute; z-index:2; left:0; bottom:-1px; width:100%; height:132px; }
+.hero { position:relative; z-index:3; }
+.hero-top { display:flex; justify-content:space-between; align-items:center; font:500 15px var(--body); }
+.hero-top .status { font:600 13px var(--body); padding:4px 10px; border-radius:99px; background:rgba(255,255,255,.16); backdrop-filter:blur(8px); }
+.days { display:flex; gap:8px; overflow-x:auto; margin:14px -20px 0; padding:0 20px 4px; scrollbar-width:none; }
+.days::-webkit-scrollbar { display:none; }
+.days button { flex:none; min-width:60px; padding:7px 10px 6px; border-radius:14px; text-align:center; color:#fff;
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.28); backdrop-filter:blur(8px); }
+.days button b { display:block; font:600 22px/1 var(--disp); }
+.days button span { font-size:12px; opacity:.9; }
+.days button[aria-current=date] { background:#fff; color:#14213D; border-color:#fff; }
+.city { margin:22px 0 0; font:700 66px/.92 var(--disp); letter-spacing:-.015em; text-shadow:0 2px 18px rgba(0,0,0,.12); }
+.date { margin:8px 0 0; font:500 17px var(--body); opacity:.95; }
+
+/* ── Next stop ── */
+.next { position:relative; z-index:5; width:calc(100% - 32px); max-width:528px; margin:-34px auto 0; padding:18px 18px 16px;
+  background:var(--card); border-radius:22px; box-shadow:var(--lift); }
+.next .k { display:flex; align-items:center; gap:8px; margin:0; font:600 14px var(--body); color:var(--muted); }
+.next .k b { color:var(--shu); font-weight:600; }
+.pulse { width:9px; height:9px; border-radius:50%; background:var(--shu); }
+.next .main { display:grid; grid-template-columns:auto 1fr; column-gap:16px; align-items:baseline; margin-top:8px; }
+.next time { font:700 46px/1 var(--disp); font-variant-numeric:tabular-nums; color:var(--ink); }
+.next h2 { margin:0; font:600 25px/1.12 var(--disp); color:var(--ink); }
+.next .jp-min { grid-column:2; font-size:17px; color:var(--muted); margin-top:3px; }
+.go { display:flex; gap:10px; align-items:flex-start; margin:14px 0 0; padding-top:12px; border-top:1px solid var(--hair); font-size:15px; }
+.go .ic { color:var(--c); margin-top:1px; }
+.acts { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.btn { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border-radius:13px; font:600 15px var(--body);
+  text-decoration:none; color:var(--ink); background:var(--soft); }
+.btn.primary { background:var(--ink); color:var(--bg); }
+
+/* ── Route line ── */
+.sec-h { display:flex; justify-content:space-between; align-items:baseline; margin:30px 0 6px; }
+.sec-h h2 { margin:0; font:600 22px var(--disp); color:var(--ink); }
+.sec-h span { font-size:14px; color:var(--muted); }
+.line { list-style:none; margin:0; padding:0; }
+.row { display:grid; grid-template-columns:48px 28px 1fr; column-gap:12px; }
+.row .t { text-align:right; padding-top:18px; font:600 17px/1 var(--disp); font-variant-numeric:tabular-nums; color:var(--ink); }
+.rail { position:relative; display:flex; justify-content:center; }
+.rail::before { content:""; position:absolute; top:0; bottom:0; width:3px; border-radius:2px; background:var(--hair); }
+.row.first .rail::before { top:28px; } .row.last .rail::before { bottom:auto; height:28px; }
+.node { position:relative; margin-top:14px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center;
+  background:var(--card); border:2px solid var(--c); color:var(--c); }
+.stop.is-done .node { background:var(--c); color:var(--card); }
+.stop.is-done .name, .stop.is-done .t { opacity:.45; }
+.stop.is-next .node { box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--c); }
+.body { min-width:0; padding:8px 0 14px; }
+.head { display:block; width:100%; text-align:left; padding:6px 0; }
+.name { display:block; font:600 19px/1.22 var(--disp); color:var(--ink); }
+.sub { display:block; font-size:14px; color:var(--muted); }
+.sub .jp-min { margin-left:6px; }
+.leg .rail::before { width:2px; background:repeating-linear-gradient(var(--muted) 0 4px,transparent 4px 9px); opacity:.6; }
+.leg .txt { display:flex; gap:8px; align-items:center; padding:6px 0; font-size:14px; color:var(--muted); }
+.nowrow .rail::after { content:""; position:relative; z-index:1; width:12px; height:12px; margin-top:7px; border-radius:50%; background:var(--shu); box-shadow:0 0 0 4px var(--bg); }
+.nowrow .txt { display:flex; align-items:center; gap:10px; font:600 14px var(--body); color:var(--shu); }
+.nowrow .txt::after { content:""; flex:1; height:2px; background:var(--shu); opacity:.35; }
+.panel { margin:4px 0 6px; padding:14px 16px; border-radius:16px; background:var(--card); border:1px solid var(--hair); }
+.panel[hidden] { display:none; }
+.facts { display:grid; grid-template-columns:auto 1fr; gap:6px 16px; margin:0; font-size:15px; }
+.facts dt { color:var(--muted); } .facts dd { margin:0; color:var(--text); }
+.tip { margin:10px 0 0; font-size:15px; }
+.tonight { display:flex; align-items:center; gap:14px; margin:18px 0 0; padding:16px; border-radius:18px; background:var(--card); }
+.tonight .ic { color:var(--stay); }
+.tonight div { flex:1; min-width:0; }
+.tonight small { display:block; color:var(--muted); font-size:13px; }
+.tonight b { display:block; font:600 18px/1.2 var(--disp); color:var(--ink); }
+
+/* ── Page headers for other tabs ── */
+.page-h { padding:calc(28px + env(safe-area-inset-top)) 0 6px; }
+.page-h h1 { margin:0; font:700 44px/1 var(--disp); color:var(--ink); letter-spacing:-.01em; }
+.page-h p { margin:8px 0 0; color:var(--muted); font-size:15px; max-width:44ch; }
+
+/* ── Places ── */
+.seg { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:4px; margin-top:18px; border-radius:14px; background:var(--soft); }
+.seg button { min-height:38px; border-radius:10px; font:600 15px var(--body); color:var(--muted); }
+.seg button[aria-pressed=true] { background:var(--card); color:var(--ink); box-shadow:0 1px 3px rgba(20,33,61,.12); }
+.search { display:flex; align-items:center; gap:10px; margin-top:10px; padding:0 14px; border-radius:14px; background:var(--card); border:1px solid var(--hair); color:var(--muted); }
+.search input { flex:1; min-width:0; border:0; background:none; font:inherit; color:var(--text); padding:12px 0; outline:none; }
+.area { margin:26px 0 4px; font:600 15px var(--body); color:var(--muted); }
+.area b { font:600 20px var(--disp); color:var(--ink); margin-right:6px; }
+.place { border-bottom:1px solid var(--hair); }
+.place > button { width:100%; display:grid; grid-template-columns:36px 1fr auto; gap:14px; align-items:center; padding:14px 0; text-align:left; }
+.badge { width:36px; height:36px; border-radius:11px; display:grid; place-items:center; color:var(--c); background:color-mix(in srgb,var(--c) 14%,transparent); }
+.when { font:600 15px var(--disp); color:var(--muted); text-align:right; }
+.when.unplanned { font:500 13px var(--body); }
+.place .panel { margin:0 0 14px 50px; }
+.empty { margin:28px 0; color:var(--muted); }
+
+/* ── Wallet: boarding passes ── */
+.group { margin:26px 0 10px; font:600 20px var(--disp); color:var(--ink); }
+.pass { position:relative; margin:0 0 16px; border-radius:20px; background:var(--card); }
+.pass-top { padding:16px 18px 18px; }
+.pass-h { display:flex; justify-content:space-between; align-items:center; gap:8px; font:500 14px var(--body); color:var(--muted); }
+.pass-h span:first-child { display:flex; align-items:center; gap:8px; color:var(--c); font-weight:600; }
+.route { display:grid; grid-template-columns:1fr auto 1fr; align-items:start; gap:6px; margin-top:12px; }
+.route b { display:block; font:700 42px/1 var(--disp); color:var(--ink); white-space:nowrap; }
+.route b.long { font-size:30px; line-height:1.4; }
+.route span { display:block; margin-top:4px; font-size:14px; color:var(--muted); }
+.route em { display:block; font:600 17px var(--disp); font-style:normal; color:var(--ink); }
+.route .r { text-align:right; }
+.route .mid { display:flex; flex-direction:column; align-items:center; gap:4px; padding-top:6px; color:var(--c); font-size:12px; font-weight:600; }
+.route .mid i { display:block; width:56px; height:2px; background:repeating-linear-gradient(90deg,currentColor 0 5px,transparent 5px 9px); }
+.perf { position:relative; margin:0 16px; border-top:2px dashed var(--hair); }
+.perf::before, .perf::after { content:""; position:absolute; top:-13px; width:24px; height:24px; border-radius:50%; background:var(--bg); }
+.perf::before { left:-28px; } .perf::after { right:-28px; }
+.pf { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:0; padding:14px 18px 4px; }
+.pf dt { font-size:12px; color:var(--muted); }
+.pf dd { margin:0; font:600 19px/1.2 var(--disp); color:var(--ink); }
+.ref { display:flex; width:calc(100% - 36px); margin:10px 18px 0; padding:12px 0 16px; justify-content:space-between; align-items:center; border-top:1px solid var(--hair); text-align:left; }
+.ref small { display:block; font-size:12px; color:var(--muted); }
+.ref b { font:700 24px var(--disp); letter-spacing:.08em; color:var(--ink); }
+.ref .btn { min-height:38px; }
+.pass .acts { padding:0 18px 16px; margin:0; }
+
+/* ── Help ── */
+.sos { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:10px; margin-top:18px; }
+.call { display:block; padding:14px 16px; border-radius:18px; text-decoration:none; background:var(--shu); color:#fff; }
+.call b { display:block; font:700 40px/1 var(--disp); }
+.call span { font-size:14px; font-weight:500; }
+.line-item { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--hair); text-decoration:none; }
+.line-item .badge { --c:var(--shu); }
+.line-item div { flex:1; }
+.line-item small { display:block; color:var(--muted); font-size:13px; }
+.line-item b { font:600 19px var(--disp); color:var(--ink); }
+.phrase { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--hair); }
+.phrase div { flex:1; min-width:0; }
+.phrase .jp { display:block; font:600 20px/1.35 var(--goth); color:var(--ink); }
+.phrase .say { display:block; font-size:14px; font-style:italic; color:var(--text); }
+.phrase small { display:block; font-size:14px; color:var(--muted); }
+.conv { margin-top:8px; padding:16px; border-radius:18px; background:var(--card); }
+.conv-row { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.conv label { display:flex; align-items:baseline; gap:6px; font:600 18px var(--disp); color:var(--muted); }
+.conv input { width:140px; border:0; border-bottom:2px solid var(--ink); background:none; color:var(--ink); font:700 34px var(--disp); padding:0; }
+.conv output { font:700 34px var(--disp); color:var(--ink); }
+.conv output small { font-size:18px; color:var(--muted); margin-right:4px; }
+.presets { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+.presets button { padding:6px 12px; border-radius:10px; background:var(--soft); font:600 14px var(--body); }
+.progress { height:6px; border-radius:3px; background:var(--soft); margin:8px 0 4px; overflow:hidden; }
+.progress i { display:block; height:100%; background:var(--sight); border-radius:3px; }
+.check { display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--hair); }
+.check input { width:22px; height:22px; accent-color:var(--sight); }
+.check input:checked + span { color:var(--muted); text-decoration:line-through; }
+
+/* ── Bottom nav ── */
+nav { position:fixed; z-index:10; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); max-width:520px; margin:0 auto;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:4px; padding:6px; border-radius:22px;
+  background:color-mix(in srgb,var(--card) 86%,transparent); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4); box-shadow:var(--lift); }
+nav button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 0 6px; border-radius:16px; font:600 12px var(--body); color:var(--muted); }
+nav button[aria-current=page] { background:var(--ink); color:var(--bg); }
+
+/* ── Show-to-staff screen ── */
+.show { position:fixed; inset:0; z-index:20; display:flex; flex-direction:column; justify-content:center; padding:32px 24px; text-align:center; background:var(--card); color:var(--ink); }
+.show[hidden] { display:none; }
+.show .ask { margin:0 0 18px; font:600 19px/1.4 var(--goth); color:var(--muted); }
+.show .big { margin:0; font:800 clamp(36px,10.5vw,68px)/1.22 var(--min); overflow-wrap:anywhere; }
+.show .big.code { font:700 clamp(54px,18vw,110px)/1 var(--disp); letter-spacing:.08em; }
+.show .addr { margin:22px 0 0; font:600 clamp(20px,5.6vw,30px)/1.45 var(--goth); }
+.show .en { margin:22px 0 0; color:var(--muted); }
+.show .close { position:absolute; top:calc(16px + env(safe-area-inset-top)); right:16px; }
+
+/* ── One orchestrated entrance ── */
+@media (prefers-reduced-motion:no-preference) {
+  .intro .city-jp { animation:rise 1.1s cubic-bezier(.2,.7,.2,1) both; }
+  .intro .orb { animation:fade 1.4s ease-out both; }
+  .intro .next { animation:rise .7s .25s cubic-bezier(.2,.7,.2,1) both; }
+  .pulse { animation:pulse 2s infinite; }
+  .panel { animation:open .18s ease-out; }
+}
+@keyframes rise { from { opacity:0; transform:translateY(24px); } }
+@keyframes fade { from { opacity:0; } }
+@keyframes open { from { opacity:0; transform:translateY(-4px); } }
+@keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(207,59,38,.55); } 70%,100% { box-shadow:0 0 0 9px rgba(207,59,38,0); } }
+
+/* ── Lock screen ── */
+.lock { position:fixed; inset:0; z-index:30; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:14px; padding:24px 20px calc(40px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,#262B5C 0%,#7A4677 50%,#E47F55 100%); color:#fff; overflow:hidden; }
+.lock[hidden] { display:none; }
+.lock-emblem { position:absolute; top:calc(36px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:1; width:min(64vw,300px,40vh); height:auto; filter:drop-shadow(0 14px 40px rgba(0,0,0,.3)); animation:float 6s ease-in-out infinite; }
+@keyframes float { 50% { transform:translate(-50%,-6px); } }
+@media (prefers-reduced-motion:reduce) { .lock-emblem { animation:none; } }
+.lock-card { position:relative; z-index:2; width:100%; max-width:400px; padding:24px 22px 22px; border-radius:26px; background:var(--card); color:var(--text); box-shadow:var(--lift); display:grid; gap:14px; }
+.lock-card[hidden] { display:none; }
+.lock-card h1 { margin:0; font:700 28px/1.1 var(--disp); color:var(--ink); }
+.lock-card p { margin:-6px 0 2px; color:var(--muted); }
+.lock-field { display:grid; gap:6px; font:600 13px var(--body); color:var(--muted); }
+.lock-field input { font:500 20px var(--body); padding:12px 14px; border-radius:14px; border:1.5px solid var(--hair); background:var(--bg); color:var(--ink); width:100%; }
+.lock-field input:focus { outline:none; border-color:var(--move); }
+.lock-remember { display:flex; align-items:center; gap:10px; color:var(--muted); }
+.lock-remember input { width:20px; height:20px; accent-color:var(--ink); }
+.lock-card .btn { justify-content:center; padding:14px; font-size:17px; }
+.lock-msg { position:relative; z-index:2; margin:0; min-height:1.5em; font-weight:600; text-shadow:0 1px 8px rgba(0,0,0,.35); }
+.lock-btn { width:100%; justify-content:center; margin:28px 0 8px; }
+</style>
+</head>
+<body class="intro">
+<section class="lock" id="lock" data-phase="dusk" aria-label="解鎖行程">
+  <svg class="lock-emblem" aria-hidden="true" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pizza and spaghetti"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262B5C"/><stop offset=".55" stop-color="#7A4677"/><stop offset="1" stop-color="#E47F55"/></linearGradient><radialGradient id="glow"><stop offset=".55" stop-color="#FFD59A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD59A" stop-opacity="0"/></radialGradient></defs><clipPath id="b"><circle cx="100" cy="100" r="96"/></clipPath><g clip-path="url(#b)"><rect width="200" height="200" fill="url(#sky)"/><circle cx="100" cy="104" r="84" fill="url(#glow)"/><mask id="cut"><rect width="200" height="200" fill="#fff"/><path d="M100 104 L112.9 43.4 A62 62 0 0 1 148.9 65.8 Z" fill="#000"/></mask>
+<g mask="url(#cut)"><circle cx="100" cy="104" r="58" fill="#D98C2B"/><circle cx="100" cy="104" r="50" fill="#FFCF5A"/>
+<circle cx="100" cy="104" r="50" fill="none" stroke="#F2A33A" stroke-width="3" stroke-dasharray="4 7"/><circle cx="72" cy="78" r="8.5" fill="#C7372F"/><circle cx="69.5" cy="75.5" r="2.4" fill="#E3594C"/><circle cx="96" cy="92" r="7.5" fill="#C7372F"/><circle cx="93.8" cy="89.8" r="2.1" fill="#E3594C"/><circle cx="126" cy="104" r="7.5" fill="#C7372F"/><circle cx="123.8" cy="101.8" r="2.1" fill="#E3594C"/><circle cx="66" cy="104" r="7" fill="#C7372F"/><circle cx="63.9" cy="101.9" r="2.0" fill="#E3594C"/><circle cx="90" cy="62" r="6.5" fill="#C7372F"/><circle cx="88.0" cy="60.0" r="1.8" fill="#E3594C"/><circle cx="112" cy="116" r="6" fill="#C7372F"/><circle cx="110.2" cy="114.2" r="1.7" fill="#E3594C"/><path d="M108 76c5-6 12-5 14 0-5 5-11 5-14 0z" fill="#3E8E4A"/><path d="M80 92c4-6 11-6 13-1-5 5-10 5-13 1z" fill="#3E8E4A"/><path d="M52 90c3-5 9-6 12-2-4 5-9 5-12 2z" fill="#3E8E4A"/></g>
+<g transform="translate(5.3 -8.5)"><clipPath id="sl"><path d="M100 104 L112.9 43.4 A62 62 0 0 1 148.9 65.8 Z"/></clipPath><g clip-path="url(#sl)">
+<circle cx="100" cy="104" r="58" fill="#D98C2B"/><circle cx="100" cy="104" r="50" fill="#FFCF5A"/><circle cx="124" cy="66" r="6.5" fill="#C7372F"/><circle cx="122.0" cy="64.0" r="1.8" fill="#E3594C"/><circle cx="140" cy="80" r="5.5" fill="#C7372F"/><circle cx="138.3" cy="78.3" r="1.5" fill="#E3594C"/></g></g>
+'<path d="M103.3 88.3 q4.1 -2.7 5.3 -8.5" stroke="#FFE08A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M106.2 74.7 q4.1 -2.7 5.3 -8.5" stroke="#FFE08A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M109.1 61.0 q4.1 -2.7 5.3 -8.5" stroke="#FFE08A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M112.6 94.1 q4.1 -2.7 5.3 -8.5" stroke="#FFE08A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M123.6 85.5 q4.1 -2.7 5.3 -8.5" stroke="#FFE08A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M134.7 76.9 q4.1 -2.7 5.3 -8.5" stroke="#FFE08A" stroke-width="2.2" fill="none" stroke-linecap="round"/><rect x="0" y="118" width="200" height="200" fill="#F5D27A"/><path d="M-20 120 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0" fill="none" stroke="#EDBE5C" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 129 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0" fill="none" stroke="#FBE3A0" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 138 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0" fill="none" stroke="#EDBE5C" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 147 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0" fill="none" stroke="#FBE3A0" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 156 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0" fill="none" stroke="#EDBE5C" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 165 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0" fill="none" stroke="#FBE3A0" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 174 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0" fill="none" stroke="#EDBE5C" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 183 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0" fill="none" stroke="#FBE3A0" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 192 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0" fill="none" stroke="#EDBE5C" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 201 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0 q12.5 4 25 0 q12.5 -4 25 0" fill="none" stroke="#FBE3A0" stroke-width="5.5" stroke-linecap="round"/><path d="M-20 120 q12.5 -5 25 0 q12.5 5 25 0 q12.5 -5 25 0 q12.5 5 25 0 q12.5 -5 25 0 q12.5 5 25 0 q12.5 -5 25 0 q12.5 5 25 0 q12.5 -5 25 0 q12.5 5 25 0" fill="none" stroke="#C7372F" stroke-width="8" stroke-linecap="round"/><path d="M-10 118 h220" stroke="#C7372F" stroke-width="5"/><circle cx="38" cy="126" r="9" fill="#7A3B22"/><circle cx="34.9" cy="122.8" r="2.7" fill="#A45A35"/><circle cx="92" cy="150" r="7" fill="#7A3B22"/><circle cx="89.5" cy="147.6" r="2.1" fill="#A45A35"/><path d="M58 142c4-6 11-6 13-1-5 5-10 5-13 1z" fill="#3E8E4A"/><path d="M128 160c4-6 11-6 13-1-5 5-10 5-13 1z" fill="#3E8E4A"/><g stroke-linecap="round" fill="none">
+<path d="M147 124 L176 58" stroke="#5B6576" stroke-width="8"/><path d="M147 124 L176 58" stroke="#E8ECF2" stroke-width="5"/>
+<path d="M173 64 l4 -9" stroke="#FFFFFF" stroke-width="2"/></g>
+<g fill="none" stroke-linecap="round"><ellipse cx="145" cy="138" rx="19" ry="9" stroke="#EDBE5C" stroke-width="5"/>
+<ellipse cx="145" cy="132" rx="16" ry="7" stroke="#FBE3A0" stroke-width="4.5"/><ellipse cx="146" cy="126" rx="12" ry="5.5" stroke="#EDBE5C" stroke-width="4.5"/>
+<path d="M134 124 q-6 8 -2 16" stroke="#FBE3A0" stroke-width="3.5"/><path d="M140 121 q8 -3 14 1" stroke="#C7372F" stroke-width="4"/></g>
+<circle cx="170" cy="150" r="8" fill="#7A3B22"/><circle cx="167" cy="147" r="2.4" fill="#A45A35"/><circle cx="34" cy="34" r="1.4" fill="#fff"/><circle cx="160" cy="28" r="1.2" fill="#fff"/><circle cx="176" cy="60" r="1" fill="#fff"/><circle cx="22" cy="66" r="1" fill="#fff"/></g><circle cx="100" cy="100" r="96" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="5"/></svg>
+  <form class="lock-card" id="lock-form" hidden autocomplete="on">
+    <h1>我的旅程</h1>
+    <p>行程已加密。輸入密碼解鎖。</p>
+    <input type="text" name="username" value="trip" autocomplete="username" hidden>
+    <label class="lock-field"><span>密碼</span><input id="pw" type="password" autocomplete="current-password" required></label>
+    <label class="lock-remember"><input id="remember" type="checkbox" checked>記住此裝置</label>
+    <button class="btn primary" type="submit">解鎖</button>
+  </form>
+  <p class="lock-msg" id="lock-msg" role="status"></p>
+</section>
+<main id="view"></main>
+<nav id="nav" aria-label="分頁"></nav>
+<div class="show" id="show" hidden role="dialog" aria-modal="true" aria-label="給職員看">
+  <button class="btn close" onclick="hideShow()">關閉</button>
+  <p class="ask" id="show-ask"></p><p class="big" id="show-big"></p><p class="addr" id="show-addr"></p><p class="en" id="show-en"></p>
+</div>
+
+<script>
+/* The trip plan is encrypted. Edit trip.json on your PC, then seal it with encrypt.html.
+   days[].items[].ref points to a place or ticket id. Times are local, 24 h. */
+let TRIP = null; // decrypted at runtime from trip.enc.json. Plain data lives in trip.json (never committed).
+// Note: the "jp" field holds the name in the local language (e.g. Vietnamese).
+/* ═══════════════════════════════════════════════════ */
+
+const ICONS = {
+  sight: '<path d="M3 9.5L12 4l9 5.5M5 9.5h14M6.5 9.5V18M10.5 9.5V18M13.5 9.5V18M17.5 9.5V18M4 18h16M3 21h18"/>',
+  food: '<path d="M3 11h18a9 9 0 0 1-18 0zM8.5 3.5c0 1.5 1.5 1.5 1.5 3M13.5 3.5c0 1.5 1.5 1.5 1.5 3"/>',
+  train: '<rect x="5" y="3" width="14" height="13" rx="3"/><path d="M5 10h14M8.5 20l2-4M15.5 20l-2-4"/><circle cx="8.5" cy="13" r=".6"/><circle cx="15.5" cy="13" r=".6"/>',
+  plane: '<path d="M21 15.5v-2l-8-5V3.6a1.5 1.5 0 0 0-3 0v4.9l-8 5v2l8-2.5V18l-2 1.5V21l3.5-1 3.5 1v-1.5L13 18v-5z"/>',
+  walk: '<circle cx="13" cy="4" r="1.8"/><path d="M10 21l2.5-6.5 3 3V21M7 12.5l2.5-4 4 .5 2 3 3 1M12.5 14.5l-1-5.5"/>',
+  taxi: '<path d="M4 17V12l2-5h12l2 5v5zM4 12h16M9 4h6"/><circle cx="8" cy="15" r="1"/><circle cx="16" cy="15" r="1"/>',
+  bed: '<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>',
+  pin: '<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  nav: '<path d="M3 11l18-8-8 18-2-8z"/>',
+  speak: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  ticket: '<path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2z"/><path d="M14 6v12" stroke-dasharray="2 2"/>',
+  day: '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  help: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/>',
+  phone: '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
+};
+const ic = (n, s = 20) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ""}</svg>`;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const color = { sight:"var(--sight)", food:"var(--food)", move:"var(--move)", stay:"var(--stay)" };
+const kindWord = { sight:"景點", food:"美食", move:"交通", stay:"住宿" };
+const kindIcon = x => x.kind === "move" ? (x.mode || "train") : x.kind === "stay" ? "bed" : x.kind;
+const find = id => TRIP.places.find(p => p.id === id) || TRIP.tickets.find(t => t.id === id) || { id, name: id, kind: "sight" };
+const store = { get: k => JSON.parse(localStorage.getItem("dn26:" + k) || "null"), set: (k, v) => localStorage.setItem("dn26:" + k, JSON.stringify(v)) };
+const mapsUrl = x => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([x.jp || x.name, x.addr].filter(Boolean).join(", "))}`;
+
+/* Clock. Add ?now=2026-11-01T15:10 to the URL to preview a moment in the trip. */
+const qNow = new URLSearchParams(location.search).get("now");
+const NOW = qNow ? new Date(qNow) : new Date();
+const pad = n => String(n).padStart(2, "0");
+const isoOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const TODAY = isoOf(NOW), HM = `${pad(NOW.getHours())}:${pad(NOW.getMinutes())}`;
+const h = NOW.getHours();
+const PHASE = h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 16 ? "day" : h >= 16 && h < 19 ? "dusk" : "night";
+const dateObj = iso => new Date(iso + "T12:00");
+const longDate = iso => dateObj(iso).toLocaleDateString("zh-HK", { month: "long", day: "numeric", weekday: "long" });
+const mins = t => +t.slice(0, 2) * 60 + +t.slice(3);
+const until = t => { const m = mins(t) - mins(HM); return m <= 0 ? "現在" : m < 60 ? `${m} 分鐘後` : `${Math.floor(m / 60)} 小時${m % 60 ? " " + (m % 60) + " 分" : ""}後`; };
+
+let tab = "day", open = null, filter = "all", query = "";
+let dayIdx = 0;
+
+/* ── Skyline drawn per city ── */
+function skyline(city) {
+  const style = (TRIP.skyline || {})[city] || ""; // "lanterns" | "coast" | "" — set per city in trip.json
+  const W = 400, H = 132; let seed = 11; const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const blocks = (minH, maxH, minW, maxW, gap) => { let x = -4, d = ""; while (x < W) { const w = minW + r() * (maxW - minW), hh = minH + r() * (maxH - minH); d += `M${x.toFixed(1)} ${H}V${(H - hh).toFixed(1)}h${w.toFixed(1)}V${H}Z`; x += w + gap; } return d; };
+  let back, mid, front;
+  if (style === "lanterns") {
+    back = `<path d="M0 70 Q90 44 180 66 T400 58 V132 H0Z" fill="rgba(255,255,255,.12)"/>`;
+    let houses = "", x = -6; while (x < W) { const w = 30 + r() * 24, hh = 24 + r() * 22; houses += `M${x} ${H}V${H - hh}l${w * .18} -9h${w * .64}l${w * .18} 9V${H}Z`; x += w + 2; }
+    mid = `<path d="${houses}" fill="rgba(10,18,40,.24)"/>`;
+    const bx = 150, by = 112;
+    const bridge = `M${bx - 70} ${H}V${by}Q${bx} ${by - 26} ${bx + 70} ${by}V${H}Z M${bx - 56} ${by - 10}L${bx - 62} ${by - 14}Q${bx} ${by - 44} ${bx + 62} ${by - 14}L${bx + 56} ${by - 10}Q${bx} ${by - 34} ${bx - 56} ${by - 10}Z M${bx - 52} ${by - 10}h6v-2h-6Z M${bx - 12} ${by - 34}l12 -10l12 10Z`;
+    let river = `M0 ${H}V120Q100 116 200 120T400 118V${H}Z`;
+    front = `<path d="${bridge} ${river}" fill="var(--bg)"/>`;
+    const cols = ["#E8483B", "#F2B33D", "#E0663A", "#C93A6B", "#F28C38", "#E8483B", "#F2B33D"];
+    let lan = `<path d="M232 50 Q300 66 396 48" stroke="rgba(255,255,255,.45)" stroke-width="1" fill="none"/>`;
+    cols.forEach((c, i) => { const lx = 246 + i * 22, ly = 56 + Math.sin(i * .9) * 3 + (i > 0 && i < 6 ? 5 : 0); lan += `<line x1="${lx}" y1="${ly - 6}" x2="${lx}" y2="${ly - 2}" stroke="rgba(255,255,255,.5)"/><ellipse cx="${lx}" cy="${ly + 5}" rx="6" ry="7.5" fill="${c}"/><rect x="${lx - 3}" y="${ly - 3}" width="6" height="2" fill="#3a2a1a"/>`; });
+    front = lan + front;
+  } else if (style === "coast") {
+    back = `<path d="M0 74 Q40 40 92 52 Q130 26 176 50 Q200 58 226 72 V132 H0Z" fill="rgba(255,255,255,.14)"/><path d="${blocks(54, 96, 10, 20, 5).replace(/M-?[\d.]+ /, "M210 ")}" fill="rgba(255,255,255,.1)"/>`;
+    const wx = 318, wy = 58, wr = 34; let spokes = "";
+    for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; spokes += `M${wx} ${wy}L${(wx + wr * Math.cos(a)).toFixed(1)} ${(wy + wr * Math.sin(a)).toFixed(1)}`; }
+    let cabins = ""; for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6 + .26; cabins += `<circle cx="${(wx + wr * Math.cos(a)).toFixed(1)}" cy="${(wy + wr * Math.sin(a)).toFixed(1)}" r="2.6"/>`; }
+    mid = `<g fill="rgba(10,18,40,.26)" stroke="rgba(10,18,40,.26)"><circle cx="${wx}" cy="${wy}" r="${wr}" fill="none" stroke-width="2.4"/><path d="${spokes}" stroke-width="1"/>${cabins}<path d="M${wx - 4} ${wy}L${wx - 18} ${H}h6l10 -${H - wy - 10}l10 ${H - wy - 10}h6L${wx + 4} ${wy}Z" stroke="none"/><path d="${blocks(30, 70, 14, 26, 6)}" stroke="none"/></g>`;
+    let dragon = ""; const d0 = 18, seg = 40;
+    for (let i = 0; i < 6; i++) { const x0 = d0 + i * seg; dragon += `${i ? "" : `M${x0} 108`}Q${x0 + seg / 2} ${i % 2 ? 84 : 76} ${x0 + seg} 108`; }
+    const hx = d0 + 6 * seg;
+    let palms = ""; [[350, 96], [372, 102], [392, 94]].forEach(([px, py]) => { palms += `M${px - 1.5} ${H}Q${px + 2} ${(py + H) / 2} ${px} ${py}h3Q${px + 5} ${(py + H) / 2} ${px + 1.5} ${H}Z M${px + 1} ${py}q-12 -4 -18 6q8 -6 18 -4q-6 -10 -16 -10q10 0 16 8q2 -10 12 -12q-8 6 -10 12q8 -6 18 -2q-10 -2 -18 4q10 2 14 12q-8 -8 -16 -10Z`; });
+    front = `<path d="${dragon}" fill="none" stroke="var(--bg)" stroke-width="6" stroke-linecap="round"/><path d="M${hx - 2} 106l8 -10l7 2l-3 5l6 3l-8 3Z M0 ${H}V108H400V${H}Z ${palms}" fill="var(--bg)"/>`;
+  } else {
+    back = `<path d="M0 64 Q70 26 140 58 T270 44 T400 60 V132 H0Z" fill="rgba(255,255,255,.14)"/>`;
+    mid = `<path d="${blocks(26, 56, 18, 34, 4)}" fill="rgba(10,18,40,.24)"/>`;
+    front = `<path d="${blocks(8, 28, 22, 44, 0)}" fill="var(--bg)"/>`;
+  }
+  return `<svg class="skyline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${back}${mid}${front}</svg>`;
+}
+
+/* ── Shared bits ── */
+function factsList(x) {
+  const rows = x.facts ? Object.entries(x.facts) : [["時間", x.hours], ["費用", x.cost], ["推介", x.order]];
+  return `<dl class="facts">${rows.filter(r => r[1]).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`;
+}
+function actions(x, extra = "") {
+  const id = esc(x.id), b = [];
+  if (x.addr) b.push(`<a class="btn primary" target="_blank" rel="noopener" href="${mapsUrl(x)}">${ic("nav", 18)}導航</a>`);
+  if (x.ref) b.push(`<button class="btn" onclick="showTicket('${id}')">${ic("ticket", 18)}${x.kind === "stay" ? "出示訂單" : "出示車票"}</button>`);
+  if (x.jp) b.push(`<button class="btn" onclick="showItem('${id}')">${ic("speak", 18)}${esc(TRIP.lang.name)}給人看</button>`);
+  return `<div class="acts">${b.join("")}${extra}</div>`;
+}
+function panel(x, extra = "", hidden = false) {
+  return `<div class="panel" style="--c:${color[x.kind]}" ${hidden ? "hidden" : ""}>${factsList(x)}${x.tip ? `<p class="tip">${esc(x.tip)}</p>` : ""}${actions(x, extra)}</div>`;
+}
+const subOf = x => x.kind === "move" ? `${x.label}・${x.mid}` : `${kindWord[x.kind]}・${x.area}`;
+
+/* ── Day ── */
+function viewDay() {
+  const d = TRIP.days[dayIdx], isToday = d.date === TODAY, hotel = find(d.hotel), done = store.get("done:" + d.date) || [];
+  const first = TRIP.days[0].date, last = TRIP.days[TRIP.days.length - 1].date;
+  const status = TODAY < first ? `尚有 ${Math.round((dateObj(first) - dateObj(TODAY)) / 864e5)} 日出發`
+    : TODAY > last ? "旅程完結" : `第 ${TRIP.days.findIndex(x => x.date === TODAY) + 1} 日／共 ${TRIP.days.length} 日`;
+  const nextI = d.items.findIndex((it, i) => !done.includes(i) && (!isToday || it.time >= HM));
+  const nx = nextI >= 0 ? find(d.items[nextI].ref) : null, nxItem = d.items[nextI];
+  const nowAt = isToday ? (d.items.findIndex(it => it.time > HM) + 1 || d.items.length + 1) - 1 : -1;
+
+  const rows = [];
+  d.items.forEach((it, i) => {
+    const x = find(it.ref), key = d.date + ":" + i, isDone = done.includes(i);
+    if (i === nowAt) rows.push(`<li class="row nowrow"><span></span><span class="rail"></span><span class="txt">現在 ${HM}</span></li>`);
+    if (it.go && i > 0) rows.push(`<li class="row leg"><span></span><span class="rail"></span><span class="txt" style="--c:${color[x.kind]}">${ic(it.go.mode, 16)}${esc(it.go.text)}</span></li>`);
+    const cls = ["row", "stop", i === 0 && "first", i === d.items.length - 1 && "last", isDone && "is-done", i === nextI && "is-next"].filter(Boolean).join(" ");
+    const doneBtn = `<button class="btn" onclick="toggleDone('${d.date}',${i})">${ic("check", 18)}${isDone ? "取消完成" : "標記完成"}</button>`;
+    rows.push(`<li class="${cls}" style="--c:${color[x.kind]}">
+      <time class="t">${esc(it.time)}</time>
+      <span class="rail"><span class="node">${ic(isDone ? "check" : kindIcon(x), 15)}</span></span>
+      <div class="body">
+        <button class="head" aria-expanded="${open === key}" onclick="toggleOpen('${key}')">
+          <span class="name">${esc(x.name)}</span>
+          <span class="sub">${esc(subOf(x))}${x.jp && x.jp !== x.name && x.kind !== "move" ? `<span class="jp-min">${esc(x.jp)}</span>` : ""}</span>
+        </button>
+        ${panel(x, doneBtn, open !== key)}
+      </div></li>`);
+  });
+  if (nowAt === d.items.length) rows.push(`<li class="row nowrow"><span></span><span class="rail"></span><span class="txt">現在 ${HM}</span></li>`);
+
+  const nextCard = nx ? `
+    <section class="next" style="--c:${color[nx.kind]}" aria-label="${isToday ? "下一站" : "第一站"}">
+      <p class="k">${isToday ? `<span class="pulse"></span>下一站・<b>${until(nxItem.time)}</b>` : "今日第一站"}</p>
+      <div class="main"><time>${esc(nxItem.time)}</time><h2>${esc(nx.name)}</h2>${nx.jp && nx.jp !== nx.name && nx.kind !== "move" ? `<span class="jp-min">${esc(nx.jp)}</span>` : ""}</div>
+      ${nxItem.go && nextI > 0 ? `<p class="go">${ic(nxItem.go.mode, 20)}<span>${esc(nxItem.go.text)}</span></p>` : nx.from ? `<p class="go">${ic(kindIcon(nx), 20)}<span>${esc(nx.from.name)} ${esc(nx.from.time)}，抵達 ${esc(nx.to.name)} ${esc(nx.to.time)}</span></p>` : ""}
+      ${actions(nx)}
+    </section>` : `<section class="next"><p class="k">今日行程已完成。</p><div class="main"><h2 style="grid-column:1/-1">返回 ${esc(hotel.name)}</h2></div>${actions(hotel)}</section>`;
+
+  return `
+  <header class="sky" data-phase="${PHASE}">
+    <div class="orb"></div>
+    <span class="city-jp" aria-hidden="true">${esc(TRIP.cities[d.city] || "")}</span>
+    ${skyline(d.city)}
+    <div class="wrap hero">
+      <div class="hero-top"><span>${esc(TRIP.title)}</span><span class="status">${status}</span></div>
+      <div class="days" role="tablist" aria-label="行程日子">${TRIP.days.map((x, i) => `<button role="tab" ${i === dayIdx ? 'aria-current="date" aria-selected="true"' : 'aria-selected="false"'} onclick="goDay(${i})"><b>${dateObj(x.date).getDate()}</b><span>${dateObj(x.date).toLocaleDateString("zh-HK", { weekday: "short" })}</span></button>`).join("")}</div>
+      <h1 class="city">${esc(TRIP.cities[d.city] || d.city)}</h1>
+      <p class="date">${isToday ? "今日・" : ""}${longDate(d.date)}</p>
+    </div>
+  </header>
+  ${nextCard}
+  <div class="wrap">
+    <div class="sec-h"><h2>今日行程</h2><span>${d.items.length} 站${done.length ? `，已完成 ${done.length}` : ""}</span></div>
+    <ol class="line">${rows.join("")}</ol>
+    <div class="tonight">${ic("bed", 26)}<div><small>今晚住宿</small><b>${esc(hotel.name)}</b></div><button class="btn" onclick="showItem('${esc(hotel.id)}')">${ic("speak", 18)}地址</button></div>
+  </div>`;
+}
+
+/* ── Places ── */
+function viewPlaces() {
+  const planned = id => TRIP.days.findIndex(d => d.items.some(it => it.ref === id));
+  const q = query.toLowerCase();
+  const list = TRIP.places
+    .filter(p => (filter === "all" || p.kind === filter) && [p.name, p.jp, p.area, p.city, p.order, p.tip].join(" ").toLowerCase().includes(q))
+    .sort((a, b) => { const o = p => { const i = planned(p.id); return i < 0 ? 99 : i; }; return o(a) - o(b); });
+  const groups = [...new Set(list.map(p => p.area + "|" + p.city))];
+  const chip = (k, l) => `<button aria-pressed="${filter === k}" onclick="setFilter('${k}')">${l}</button>`;
+  const body = groups.length ? groups.map(g => {
+    const [area, city] = g.split("|");
+    return `<h2 class="area"><b>${esc(area)}</b>${esc(TRIP.cities[city] || city)}</h2>` + list.filter(p => p.area === area && p.city === city).map(p => {
+      const di = planned(p.id), key = "p:" + p.id;
+      return `<div class="place" style="--c:${color[p.kind]}">
+        <button aria-expanded="${open === key}" onclick="toggleOpen('${key}')">
+          <span class="badge">${ic(kindIcon(p), 20)}</span>
+          <span><span class="name">${esc(p.name)}</span><span class="sub jp-min">${p.jp !== p.name ? esc(p.jp) : esc(TRIP.cities[p.city] || "")}</span></span>
+          <span class="when ${di < 0 ? "unplanned" : ""}">${di < 0 ? "未排入行程" : "第 " + (di + 1) + " 日"}</span>
+        </button>${panel(p, "", open !== key)}</div>`;
+    }).join("");
+  }).join("") : `<p class="empty">找不到「${esc(query)}」。試試地區（例如新宿）或食物名稱。</p>`;
+  return `<div class="wrap">
+    <header class="page-h"><h1>地點</h1><p>共 ${TRIP.places.length} 個地點，按地區分組，方便睇附近仲有咩。</p></header>
+    <div class="seg" role="group" aria-label="篩選">${chip("all", "全部")}${chip("sight", "景點")}${chip("food", "美食")}</div>
+    <label class="search">${ic("search", 18)}<input type="search" placeholder="搜尋名稱、地區或食物" value="${esc(query)}" oninput="query=this.value; searchSoon()" aria-label="搜尋地點"></label>
+    <div id="places-list">${body}</div>
+  </div>`;
+}
+
+/* ── Wallet ── */
+function pass(t) {
+  const big = s => `<b class="${s.length > 4 ? "long" : ""}">${esc(s)}</b>`;
+  return `<article class="pass" style="--c:${color[t.kind]}">
+    <div class="pass-top">
+      <div class="pass-h"><span>${ic(kindIcon(t), 18)}${esc(t.label)}</span><span>${esc(t.kind === "stay" ? t.name : t.day)}</span></div>
+      <div class="route">
+        <div>${big(t.from.code)}<span>${esc(t.from.name)}</span><em>${esc(t.from.time)}</em></div>
+        <div class="mid">${ic(kindIcon(t), 18)}<i></i>${esc(t.mid)}</div>
+        <div class="r">${big(t.to.code)}<span>${esc(t.to.name)}</span><em>${esc(t.to.time)}</em></div>
+      </div>
+    </div>
+    <div class="perf"></div>
+    <dl class="pf">${Object.entries(t.facts).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+    <button class="ref" onclick="showTicket('${esc(t.id)}')"><span><small>預約編號</small><b>${esc(t.ref)}</b></span><span class="btn">出示</span></button>
+    ${t.addr || t.jp ? `<div class="acts">${t.addr ? `<a class="btn primary" target="_blank" rel="noopener" href="${mapsUrl(t)}">${ic("nav", 18)}導航</a>` : ""}${t.jp ? `<button class="btn" onclick="showItem('${esc(t.id)}')">${ic("speak", 18)}${esc(TRIP.lang.name)}給人看</button>` : ""}</div>` : ""}
+  </article>`;
+}
+function viewWallet() {
+  return `<div class="wrap">
+    <header class="page-h"><h1>票夾</h1><p>所有預訂集中一處。點按預約編號即可全螢幕出示給櫃位職員。</p></header>
+    <h2 class="group">交通</h2>${TRIP.tickets.filter(t => t.kind === "move").map(pass).join("")}
+    <h2 class="group">住宿</h2>${TRIP.tickets.filter(t => t.kind === "stay").map(pass).join("")}
+  </div>`;
+}
+
+/* ── Help ── */
+function viewHelp() {
+  const H = TRIP.help, packed = store.get("pack") || [], m = TRIP.money;
+  return `<div class="wrap">
+    <header class="page-h"><h1>求助</h1><p>點按號碼即可致電。常用句子可全螢幕出示給對方看。</p></header>
+    <div class="sos">${H.calls.map(c => `<a class="call" href="tel:${esc(c.n)}"><b>${esc(c.n)}</b><span>${esc(c.label)}</span></a>`).join("")}</div>
+    ${H.lines.map(c => `<a class="line-item" href="tel:${esc(c.n.replace(/[^+\d]/g, ""))}"><span class="badge">${ic("phone", 18)}</span><div><small>${esc(c.label)}</small><b>${esc(c.n)}</b></div></a>`).join("")}
+    <div class="sec-h"><h2>${esc(TRIP.lang.name)}常用句子</h2></div>
+    ${H.phrases.map((p, i) => `<div class="phrase"><div><span class="jp">${esc(p.jp)}</span><span class="say">${esc(p.say)}</span><small>${esc(p.en)}</small></div><button class="btn" onclick="showPhrase(${i})">出示</button></div>`).join("")}
+    <div class="sec-h"><h2>匯率換算</h2><span>1 ${esc(m.home)} ≈ ${m.localSign}${m.perHome}</span></div>
+    <div class="conv">
+      <div class="conv-row"><label>${esc(m.localSign)}<input id="amt" type="number" inputmode="decimal" value="${m.presets[1]}" oninput="conv()" aria-label="${esc(m.local)}金額"></label><output id="conv"></output></div>
+      <div class="presets">${m.presets.map(v => `<button onclick="setAmt(${v})">${m.localSign}${v.toLocaleString()}</button>`).join("")}</div>
+    </div>
+    <div class="sec-h"><h2>行李清單</h2><span id="packed">已執 ${packed.length}／${H.pack.length}</span></div>
+    <div class="progress"><i id="pbar" style="width:${packed.length / H.pack.length * 100}%"></i></div>
+    ${H.pack.map((p, i) => `<label class="check"><input type="checkbox" ${packed.includes(i) ? "checked" : ""} onchange="togglePack(${i})"><span>${esc(p)}</span></label>`).join("")}
+    <button class="btn lock-btn" onclick="lockTrip()">鎖上行程（此裝置需重新輸入密碼）</button>
+  </div>`;
+}
+
+/* ── Behaviour ── */
+const VIEWS = { day: viewDay, places: viewPlaces, wallet: viewWallet, help: viewHelp };
+const TABS = [["day", "今日", "day"], ["places", "地點", "pin"], ["wallet", "票夾", "ticket"], ["help", "求助", "help"]];
+function render(keep) {
+  const y = scrollY;
+  $("#view").innerHTML = VIEWS[tab]();
+  $("#nav").innerHTML = TABS.map(([k, l, i]) => `<button ${k === tab ? 'aria-current="page"' : ""} onclick="setTab('${k}')">${ic(i, 22)}${l}</button>`).join("");
+  if (tab === "help") conv();
+  scrollTo(0, keep ? y : 0);
+  const cur = $(".days [aria-current]"); if (cur) cur.scrollIntoView({ inline: "center", block: "nearest" });
+}
+function setTab(t) { tab = t; open = null; document.body.classList.remove("intro"); render(); }
+function goDay(i) { dayIdx = i; open = null; document.body.classList.remove("intro"); render(true); }
+function toggleOpen(k) { open = open === k ? null : k; render(true); }
+function setFilter(k) { filter = k; open = null; render(true); }
+let st; function searchSoon() { clearTimeout(st); st = setTimeout(() => { const s = $(".search input"), pos = s.selectionStart; render(true); const n = $(".search input"); n.focus(); n.setSelectionRange(pos, pos); }, 200); }
+function toggleDone(date, i) { const k = "done:" + date, s = store.get(k) || []; store.set(k, s.includes(i) ? s.filter(x => x !== i) : [...s, i]); render(true); }
+function togglePack(i) {
+  const s = store.get("pack") || [], n = s.includes(i) ? s.filter(x => x !== i) : [...s, i]; store.set("pack", n);
+  $("#packed").textContent = `已執 ${n.length}／${TRIP.help.pack.length}`; $("#pbar").style.width = n.length / TRIP.help.pack.length * 100 + "%";
+}
+function conv() { const v = Number($("#amt").value || 0); $("#conv").innerHTML = `<small>${esc(TRIP.money.home)}</small>${(v / TRIP.money.perHome).toFixed(v / TRIP.money.perHome < 100 ? 1 : 0)}`; }
+function setAmt(v) { $("#amt").value = v; conv(); }
+let lastFocus;
+function show({ ask = "", big = "", addr = "", en = "", code = false }) {
+  lastFocus = document.activeElement;
+  $("#show-ask").textContent = ask; $("#show-big").textContent = big; $("#show-big").className = "big" + (code ? " code" : "");
+  $("#show-addr").textContent = addr; $("#show-en").textContent = en; $("#show").hidden = false; $("#show .close").focus();
+}
+function showItem(id) { const x = find(id); show({ ask: x.addr ? TRIP.lang.ask : "", big: x.jp, addr: x.addr, en: x.name }); }
+function showTicket(id) { const t = find(id); show({ ask: t.jp || TRIP.lang.ref, big: t.ref, code: true, en: `${t.label}・${t.from.code} → ${t.to.code}` }); }
+function showPhrase(i) { const p = TRIP.help.phrases[i]; show({ big: p.jp, en: p.en }); }
+function hideShow() { $("#show").hidden = true; if (lastFocus) lastFocus.focus(); }
+addEventListener("keydown", e => { if (e.key === "Escape" && !$("#show").hidden) hideShow(); });
+/* ── Vault: AES-256-GCM, key from password via PBKDF2-SHA256 ── */
+const b64 = { to: u => btoa(String.fromCharCode(...new Uint8Array(u))), from: s => Uint8Array.from(atob(s), c => c.charCodeAt(0)) };
+async function deriveKey(pw, salt, iter) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt, iterations: iter }, base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+}
+async function openVault(vault, key) {
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64.from(vault.iv) }, key, b64.from(vault.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function start(data) {
+  TRIP = data; document.title = TRIP.title;
+  dayIdx = TRIP.days.findIndex(d => d.date === TODAY);
+  if (dayIdx < 0) dayIdx = TODAY > TRIP.days[TRIP.days.length - 1].date ? TRIP.days.length - 1 : 0;
+  $("#lock").hidden = true; render();
+}
+function lockTrip() { localStorage.removeItem("dn26:key"); location.reload(); }
+async function boot() {
+  const msg = $("#lock-msg"), form = $("#lock-form");
+  let vault;
+  try { vault = await (await fetch("trip.enc.json", { cache: "no-cache" })).json(); }
+  catch { msg.textContent = "未能載入行程。請連接網絡後再開一次。"; return; }
+  const saved = store.get("key");
+  if (saved && saved.salt === vault.salt) {
+    try {
+      const key = await crypto.subtle.importKey("raw", b64.from(saved.k), "AES-GCM", false, ["decrypt"]);
+      return start(await openVault(vault, key));
+    } catch { localStorage.removeItem("dn26:key"); }
+  }
+  form.hidden = false; $("#pw").focus();
+  form.onsubmit = async e => {
+    e.preventDefault(); const btn = form.querySelector("button");
+    btn.disabled = true; msg.textContent = "解鎖中…";
+    try {
+      const key = await deriveKey($("#pw").value, b64.from(vault.salt), vault.iter);
+      const data = await openVault(vault, key);
+      if ($("#remember").checked) store.set("key", { salt: vault.salt, k: b64.to(await crypto.subtle.exportKey("raw", key)) });
+      msg.textContent = ""; start(data);
+    } catch { msg.textContent = "密碼不正確，請再試一次。"; btn.disabled = false; $("#pw").select(); }
+  };
+}
+boot();
+if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>

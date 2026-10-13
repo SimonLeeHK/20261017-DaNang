@@ -1,0 +1,3 @@
+# Plain trip data. Never commit; only trip.enc.json goes online.
+trip.json
+*.plain.json
