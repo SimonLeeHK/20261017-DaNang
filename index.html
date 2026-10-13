@@ -392,7 +392,7 @@ function factsList(x) {
 function actions(x, extra = "") {
   const id = esc(x.id), b = [];
   if (x.addr) b.push(`<a class="btn primary" target="_blank" rel="noopener" href="${mapsUrl(x)}">${ic("nav", 18)}導航</a>`);
-  if (x.ref) b.push(`<button class="btn" onclick="showTicket('${id}')">${ic("ticket", 18)}${x.kind === "stay" ? "出示訂單" : x.kind === "food" ? "出示訂位" : "出示車票"}</button>`);
+  if (x.ref) b.push(`<button class="btn" onclick="showTicket('${id}')">${ic("ticket", 18)}${x.kind === "stay" ? "出示訂單" : x.kind === "food" ? "出示訂位" : x.mode === "plane" ? "出示機票" : "出示車票"}</button>`);
   if (x.jp) b.push(`<button class="btn" onclick="showItem('${id}')">${ic("speak", 18)}${esc(TRIP.lang.name)}給人看</button>`);
   return `<div class="acts">${b.join("")}${extra}</div>`;
 }
