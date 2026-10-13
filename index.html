@@ -18,7 +18,7 @@
 <style>
 :root {
   --bg:#F2F4F6; --card:#FFFFFF; --ink:#14213D; --text:#1D2431; --muted:#5B6576; --hair:#DCE1E7; --soft:#EBEFF3;
-  --sight:#4C7A47; --food:#A97508; --move:#2C5DA8; --stay:#6B4F8E; --shu:#CF3B26;
+  --sight:#4C7A47; --food:#A97508; --move:#2C5DA8; --stay:#6B4F8E; --beauty:#B0457A; --shu:#CF3B26;
   --disp:"Barlow Semi Condensed","Bahnschrift SemiCondensed","Bahnschrift","Arial Narrow","PingFang HK","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
   --body:"Barlow","Bahnschrift",system-ui,-apple-system,"Segoe UI","PingFang HK","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
   --min:"Noto Serif","Noto Serif TC","Songti TC","PMingLiU",Georgia,serif;
@@ -27,7 +27,7 @@
 }
 @media (prefers-color-scheme:dark) {
   :root { --bg:#0C1322; --card:#151E33; --ink:#E8EDF6; --text:#E1E6EE; --muted:#98A3B5; --hair:#253049; --soft:#1C2740;
-    --sight:#86B97E; --food:#E2AE3E; --move:#7EA6EC; --stay:#B49AD6; --shu:#FF6A4D; --lift:0 18px 40px -18px rgba(0,0,0,.8); }
+    --sight:#86B97E; --food:#E2AE3E; --move:#7EA6EC; --stay:#B49AD6; --beauty:#F08DBA; --shu:#FF6A4D; --lift:0 18px 40px -18px rgba(0,0,0,.8); }
 }
 * { box-sizing:border-box; }
 html { -webkit-text-size-adjust:100%; }
@@ -129,7 +129,7 @@ a { color:inherit; }
 .page-h p { margin:8px 0 0; color:var(--muted); font-size:15px; max-width:44ch; }
 
 /* ── Places ── */
-.seg { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:4px; margin-top:18px; border-radius:14px; background:var(--soft); }
+.seg { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:4px; padding:4px; margin-top:18px; border-radius:14px; background:var(--soft); }
 .seg button { min-height:38px; border-radius:10px; font:600 15px var(--body); color:var(--muted); }
 .seg button[aria-pressed=true] { background:var(--card); color:var(--ink); box-shadow:0 1px 3px rgba(20,33,61,.12); }
 .search { display:flex; align-items:center; gap:10px; margin-top:10px; padding:0 14px; border-radius:14px; background:var(--card); border:1px solid var(--hair); color:var(--muted); }
@@ -304,14 +304,15 @@ const ICONS = {
   help: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/>',
   phone: '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
-  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  beauty: '<rect x="6.5" y="11" width="11" height="10" rx="2.5"/><path d="M9.5 11V8h5v3M10.5 8V3h3v5"/>'
 };
 const ic = (n, s = 20) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ""}</svg>`;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
-const color = { sight:"var(--sight)", food:"var(--food)", move:"var(--move)", stay:"var(--stay)" };
-const kindWord = { sight:"景點", food:"美食", move:"交通", stay:"住宿" };
+const color = { sight:"var(--sight)", food:"var(--food)", move:"var(--move)", stay:"var(--stay)", beauty:"var(--beauty)" };
+const kindWord = { sight:"景點", food:"美食", move:"交通", stay:"住宿", beauty:"美甲" };
 const kindIcon = x => x.kind === "move" ? (x.mode || "train") : x.kind === "stay" ? "bed" : x.kind;
 const find = id => TRIP.places.find(p => p.id === id) || TRIP.tickets.find(t => t.id === id) || { id, name: id, kind: "sight" };
 const store = { get: k => JSON.parse(localStorage.getItem("dn26:" + k) || "null"), set: (k, v) => localStorage.setItem("dn26:" + k, JSON.stringify(v)) };
@@ -378,7 +379,7 @@ function factsList(x) {
 function actions(x, extra = "") {
   const id = esc(x.id), b = [];
   if (x.addr) b.push(`<a class="btn primary" target="_blank" rel="noopener" href="${mapsUrl(x)}">${ic("nav", 18)}導航</a>`);
-  if (x.ref) b.push(`<button class="btn" onclick="showTicket('${id}')">${ic("ticket", 18)}${x.kind === "stay" ? "出示訂單" : "出示車票"}</button>`);
+  if (x.ref) b.push(`<button class="btn" onclick="showTicket('${id}')">${ic("ticket", 18)}${x.kind === "stay" ? "出示訂單" : x.kind === "food" ? "出示訂位" : "出示車票"}</button>`);
   if (x.jp) b.push(`<button class="btn" onclick="showItem('${id}')">${ic("speak", 18)}${esc(TRIP.lang.name)}給人看</button>`);
   return `<div class="acts">${b.join("")}${extra}</div>`;
 }
@@ -389,7 +390,7 @@ const subOf = x => x.kind === "move" ? `${x.label}・${x.mid}` : `${kindWord[x.k
 
 /* ── Day ── */
 function viewDay() {
-  const d = TRIP.days[dayIdx], isToday = d.date === TODAY, hotel = find(d.hotel), done = store.get("done:" + d.date) || [];
+  const d = TRIP.days[dayIdx], isToday = d.date === TODAY, hotel = d.hotel ? find(d.hotel) : null, done = store.get("done:" + d.date) || [];
   const first = TRIP.days[0].date, last = TRIP.days[TRIP.days.length - 1].date;
   const status = TODAY < first ? `尚有 ${Math.round((dateObj(first) - dateObj(TODAY)) / 864e5)} 日出發`
     : TODAY > last ? "旅程完結" : `第 ${TRIP.days.findIndex(x => x.date === TODAY) + 1} 日／共 ${TRIP.days.length} 日`;
@@ -423,7 +424,7 @@ function viewDay() {
       <div class="main"><time>${esc(nxItem.time)}</time><h2>${esc(nx.name)}</h2>${nx.jp && nx.jp !== nx.name && nx.kind !== "move" ? `<span class="jp-min">${esc(nx.jp)}</span>` : ""}</div>
       ${nxItem.go && nextI > 0 ? `<p class="go">${ic(nxItem.go.mode, 20)}<span>${esc(nxItem.go.text)}</span></p>` : nx.from ? `<p class="go">${ic(kindIcon(nx), 20)}<span>${esc(nx.from.name)} ${esc(nx.from.time)}，抵達 ${esc(nx.to.name)} ${esc(nx.to.time)}</span></p>` : ""}
       ${actions(nx)}
-    </section>` : `<section class="next"><p class="k">今日行程已完成。</p><div class="main"><h2 style="grid-column:1/-1">返回 ${esc(hotel.name)}</h2></div>${actions(hotel)}</section>`;
+    </section>` : `<section class="next"><p class="k">今日行程已完成。</p><div class="main"><h2 style="grid-column:1/-1">${hotel ? `返回 ${esc(hotel.name)}` : "一路順風，歡迎回家"}</h2></div>${hotel ? actions(hotel) : ""}</section>`;
 
   return `
   <header class="sky" data-phase="${PHASE}">
@@ -441,7 +442,7 @@ function viewDay() {
   <div class="wrap">
     <div class="sec-h"><h2>今日行程</h2><span>${d.items.length} 站${done.length ? `，已完成 ${done.length}` : ""}</span></div>
     <ol class="line">${rows.join("")}</ol>
-    <div class="tonight">${ic("bed", 26)}<div><small>今晚住宿</small><b>${esc(hotel.name)}</b></div><button class="btn" onclick="showItem('${esc(hotel.id)}')">${ic("speak", 18)}地址</button></div>
+    ${hotel ? `<div class="tonight">${ic("bed", 26)}<div><small>今晚住宿</small><b>${esc(hotel.name)}</b></div><button class="btn" onclick="showItem('${esc(hotel.id)}')">${ic("speak", 18)}地址</button></div>` : ""}
   </div>`;
 }
 
@@ -449,7 +450,8 @@ function viewDay() {
 function viewPlaces() {
   const planned = id => TRIP.days.findIndex(d => d.items.some(it => it.ref === id));
   const q = query.toLowerCase();
-  const list = TRIP.places
+  const all = [...TRIP.places, ...TRIP.tickets.filter(t => t.kind !== "move" && t.kind !== "stay")];
+  const list = all
     .filter(p => (filter === "all" || p.kind === filter) && [p.name, p.jp, p.area, p.city, p.order, p.tip].join(" ").toLowerCase().includes(q))
     .sort((a, b) => { const o = p => { const i = planned(p.id); return i < 0 ? 99 : i; }; return o(a) - o(b); });
   const groups = [...new Set(list.map(p => p.area + "|" + p.city))];
@@ -467,8 +469,8 @@ function viewPlaces() {
     }).join("");
   }).join("") : `<p class="empty">找不到「${esc(query)}」。試試地區（例如新宿）或食物名稱。</p>`;
   return `<div class="wrap">
-    <header class="page-h"><h1>地點</h1><p>共 ${TRIP.places.length} 個地點，按地區分組，方便睇附近仲有咩。</p></header>
-    <div class="seg" role="group" aria-label="篩選">${chip("all", "全部")}${chip("sight", "景點")}${chip("food", "美食")}</div>
+    <header class="page-h"><h1>地點</h1><p>共 ${all.length} 個地點，按地區分組，方便睇附近仲有咩。</p></header>
+    <div class="seg" role="group" aria-label="篩選">${chip("all", "全部")}${chip("sight", "景點")}${chip("food", "美食")}${all.some(p => p.kind === "beauty") ? chip("beauty", "美甲") : ""}</div>
     <label class="search">${ic("search", 18)}<input type="search" placeholder="搜尋名稱、地區或食物" value="${esc(query)}" oninput="query=this.value; searchSoon()" aria-label="搜尋地點"></label>
     <div id="places-list">${body}</div>
   </div>`;
@@ -488,7 +490,7 @@ function pass(t) {
     </div>
     <div class="perf"></div>
     <dl class="pf">${Object.entries(t.facts).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
-    <button class="ref" onclick="showTicket('${esc(t.id)}')"><span><small>預約編號</small><b>${esc(t.ref)}</b></span><span class="btn">出示</span></button>
+    <button class="ref" onclick="showTicket('${esc(t.id)}')"><span><small>${esc(t.refLabel || "預約編號")}</small><b>${esc(t.ref)}</b></span><span class="btn">出示</span></button>
     ${t.addr || t.jp ? `<div class="acts">${t.addr ? `<a class="btn primary" target="_blank" rel="noopener" href="${mapsUrl(t)}">${ic("nav", 18)}導航</a>` : ""}${t.jp ? `<button class="btn" onclick="showItem('${esc(t.id)}')">${ic("speak", 18)}${esc(TRIP.lang.name)}給人看</button>` : ""}</div>` : ""}
   </article>`;
 }
@@ -497,6 +499,7 @@ function viewWallet() {
     <header class="page-h"><h1>票夾</h1><p>所有預訂集中一處。點按預約編號即可全螢幕出示給櫃位職員。</p></header>
     <h2 class="group">交通</h2>${TRIP.tickets.filter(t => t.kind === "move").map(pass).join("")}
     <h2 class="group">住宿</h2>${TRIP.tickets.filter(t => t.kind === "stay").map(pass).join("")}
+    ${TRIP.tickets.some(t => t.kind === "food") ? `<h2 class="group">餐廳訂位</h2>${TRIP.tickets.filter(t => t.kind === "food").map(pass).join("")}` : ""}
   </div>`;
 }
 
@@ -551,7 +554,7 @@ function show({ ask = "", big = "", addr = "", en = "", code = false }) {
   $("#show-addr").textContent = addr; $("#show-en").textContent = en; $("#show").hidden = false; $("#show .close").focus();
 }
 function showItem(id) { const x = find(id); show({ ask: x.addr ? TRIP.lang.ask : "", big: x.jp, addr: x.addr, en: x.name }); }
-function showTicket(id) { const t = find(id); show({ ask: t.jp || TRIP.lang.ref, big: t.ref, code: true, en: `${t.label}・${t.from.code} → ${t.to.code}` }); }
+function showTicket(id) { const t = find(id); show({ ask: t.ask || t.jp || TRIP.lang.ref, big: t.ref, code: true, en: t.en || `${t.label}・${t.from.code} → ${t.to.code}` }); }
 function showPhrase(i) { const p = TRIP.help.phrases[i]; show({ big: p.jp, en: p.en }); }
 function hideShow() { $("#show").hidden = true; if (lastFocus) lastFocus.focus(); }
 addEventListener("keydown", e => { if (e.key === "Escape" && !$("#show").hidden) hideShow(); });
