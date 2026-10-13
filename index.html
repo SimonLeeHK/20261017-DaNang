@@ -542,17 +542,20 @@ function viewHelp() {
 /* ── Behaviour ── */
 const VIEWS = { day: viewDay, places: viewPlaces, wallet: viewWallet, help: viewHelp };
 const TABS = [["day", "今日", "day"], ["places", "地點", "pin"], ["wallet", "票夾", "ticket"], ["help", "求助", "help"]];
-function render(keep) {
-  const y = scrollY;
+function render(keep, anchor) {
+  const y = scrollY, a = anchor && $(`[onclick="toggleOpen('${anchor}')"]`), top = a && a.getBoundingClientRect().top;
   $("#view").innerHTML = VIEWS[tab]();
   $("#nav").innerHTML = TABS.map(([k, l, i]) => `<button ${k === tab ? 'aria-current="page"' : ""} onclick="setTab('${k}')">${ic(i, 22)}${l}</button>`).join("");
   if (tab === "help") conv();
+  const cur = $(".days [aria-current]"), strip = cur && cur.parentElement;
+  if (cur) strip.scrollLeft = cur.offsetLeft - strip.offsetLeft - (strip.clientWidth - cur.offsetWidth) / 2;
   scrollTo(0, keep ? y : 0);
-  const cur = $(".days [aria-current]"); if (cur) cur.scrollIntoView({ inline: "center", block: "nearest" });
+  const b = a && $(`[onclick="toggleOpen('${anchor}')"]`);
+  if (b) scrollBy(0, b.getBoundingClientRect().top - top);
 }
 function setTab(t) { tab = t; open = null; document.body.classList.remove("intro"); render(); }
 function goDay(i) { dayIdx = i; open = null; document.body.classList.remove("intro"); render(true); }
-function toggleOpen(k) { open = open === k ? null : k; render(true); }
+function toggleOpen(k) { open = open === k ? null : k; render(true, k); }
 function setFilter(k) { filter = k; open = null; render(true); }
 let st; function searchSoon() { clearTimeout(st); st = setTimeout(() => { const s = $(".search input"), pos = s.selectionStart; render(true); const n = $(".search input"); n.focus(); n.setSelectionRange(pos, pos); }, 200); }
 function toggleDone(date, i) { const k = "done:" + date, s = store.get(k) || []; store.set(k, s.includes(i) ? s.filter(x => x !== i) : [...s, i]); render(true); }
