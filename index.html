@@ -200,6 +200,15 @@ a { color:inherit; }
 .check { display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--hair); }
 .check input { width:22px; height:22px; accent-color:var(--sight); }
 .check input:checked + span { color:var(--muted); text-decoration:line-through; }
+.pack-g { margin-top:6px; border-bottom:1px solid var(--hair); }
+.pack-g summary { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 0; cursor:pointer; list-style:none; }
+.pack-g summary::-webkit-details-marker { display:none; }
+.pack-g summary b { flex:1; font:600 17px var(--body); color:var(--ink); }
+.pack-g summary span { font:600 13px var(--body); color:var(--muted); padding:3px 10px; border-radius:99px; background:var(--soft); }
+.pack-g summary::after { content:""; width:8px; height:8px; margin-left:-4px; border-right:2px solid var(--muted); border-bottom:2px solid var(--muted); transform:rotate(45deg); transition:transform .2s; }
+.pack-g[open] summary::after { transform:rotate(225deg); }
+.pack-g .check:last-child { border-bottom:0; }
+.pack-note { margin:-4px 0 6px; padding:10px 12px; border-radius:12px; font-size:14px; color:var(--text); background:var(--soft); }
 
 /* ── Bottom nav ── */
 nav { position:fixed; z-index:10; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); max-width:520px; margin:0 auto;
@@ -414,7 +423,7 @@ function viewDay() {
       <span class="rail"><span class="node">${ic(isDone ? "check" : kindIcon(x), 15)}</span></span>
       <div class="body">
         <button class="head" aria-expanded="${open === key}" onclick="toggleOpen('${key}')">
-          <span class="name">${esc(x.name)}</span>
+          <span class="name">${esc(it.title || x.name)}</span>
           <span class="sub">${esc(subOf(x))}${x.jp && x.jp !== x.name && x.kind !== "move" ? `<span class="jp-min">${esc(x.jp)}</span>` : ""}</span>
         </button>
         ${panel(x, doneBtn, open !== key)}
@@ -425,10 +434,10 @@ function viewDay() {
   const nextCard = nx ? `
     <section class="next" style="--c:${color[nx.kind]}" aria-label="${isToday ? "下一站" : "第一站"}">
       <p class="k">${isToday ? `<span class="pulse"></span>下一站・<b>${until(nxItem.time)}</b>` : "今日第一站"}</p>
-      <div class="main"><time>${esc(nxItem.time)}</time><h2>${esc(nx.name)}</h2>${nx.jp && nx.jp !== nx.name && nx.kind !== "move" ? `<span class="jp-min">${esc(nx.jp)}</span>` : ""}</div>
-      ${nxItem.go && nextI > 0 ? `<p class="go">${ic(nxItem.go.mode, 20)}<span>${esc(nxItem.go.text)}</span></p>` : nx.from ? `<p class="go">${ic(kindIcon(nx), 20)}<span>${esc(nx.from.name)} ${esc(nx.from.time)}，抵達 ${esc(nx.to.name)} ${esc(nx.to.time)}</span></p>` : ""}
+      <div class="main"><time>${esc(nxItem.time)}</time><h2>${esc(nxItem.title || nx.name)}</h2>${nx.jp && nx.jp !== nx.name && nx.kind !== "move" ? `<span class="jp-min">${esc(nx.jp)}</span>` : ""}</div>
+      ${nxItem.go && nextI > 0 ? `<p class="go">${ic(nxItem.go.mode, 20)}<span>${esc(nxItem.go.text)}</span></p>` : nx.from ? `<p class="go">${ic(kindIcon(nx), 20)}<span>${nx.kind === "move" ? `${esc(nx.from.name)} ${esc(nx.from.time)}，抵達 ${esc(nx.to.name)} ${esc(nx.to.time)}` : `${esc(nx.from.name)} ${esc(nx.from.time)}・${esc(nx.to.name)} ${esc(nx.to.time)}`}</span></p>` : ""}
       ${actions(nx)}
-    </section>` : `<section class="next"><p class="k">今日行程已完成。</p><div class="main"><h2 style="grid-column:1/-1">${hotel ? `返回 ${esc(hotel.name)}` : "一路順風，歡迎回家"}</h2></div>${hotel ? actions(hotel) : ""}</section>`;
+    </section>` : !d.items.length ? `<section class="next"><p class="k">今日冇預訂行程</p><div class="main"><h2 style="grid-column:1/-1">自由活動</h2></div><p class="go">${ic("pin", 20)}<span>喺「地點」揀想去嘅美食、咖啡、景點或音樂酒吧。</span></p><div class="acts"><button class="btn primary" onclick="setTab('places')">${ic("pin", 18)}睇地點</button>${hotel ? `<button class="btn" onclick="showItem('${esc(hotel.id)}')">${ic("speak", 18)}酒店地址</button>` : ""}</div></section>` : `<section class="next"><p class="k">今日行程已完成。</p><div class="main"><h2 style="grid-column:1/-1">${hotel ? `返回 ${esc(hotel.name)}` : "一路順風，歡迎回家"}</h2></div>${hotel ? actions(hotel) : ""}</section>`;
 
   return `
   <header class="sky" data-phase="${PHASE}">
@@ -444,8 +453,8 @@ function viewDay() {
   </header>
   ${nextCard}
   <div class="wrap">
-    <div class="sec-h"><h2>今日行程</h2><span>${d.items.length} 站${done.length ? `，已完成 ${done.length}` : ""}</span></div>
-    <ol class="line">${rows.join("")}</ol>
+    ${d.items.length ? `<div class="sec-h"><h2>今日行程</h2><span>${d.items.length} 站${done.length ? `，已完成 ${done.length}` : ""}</span></div>
+    <ol class="line">${rows.join("")}</ol>` : ""}
     ${hotel ? `<div class="tonight">${ic("bed", 26)}<div><small>今晚住宿</small><b>${esc(hotel.name)}</b></div><button class="btn" onclick="showItem('${esc(hotel.id)}')">${ic("speak", 18)}地址</button></div>` : ""}
   </div>`;
 }
@@ -509,7 +518,7 @@ function viewWallet() {
 
 /* ── Help ── */
 function viewHelp() {
-  const H = TRIP.help, packed = store.get("pack") || [], m = TRIP.money;
+  const H = TRIP.help, packed = store.get("pack2") || [], m = TRIP.money;
   return `<div class="wrap">
     <header class="page-h"><h1>求助</h1><p>點按號碼即可致電。常用句子可全螢幕出示給對方看。</p></header>
     <div class="sos">${H.calls.map(c => `<a class="call" href="tel:${esc(c.n)}"><b>${esc(c.n)}</b><span>${esc(c.label)}</span></a>`).join("")}</div>
@@ -521,9 +530,11 @@ function viewHelp() {
       <div class="conv-row"><label>${esc(m.localSign)}<input id="amt" type="number" inputmode="decimal" value="${m.presets[1]}" oninput="conv()" aria-label="${esc(m.local)}金額"></label><output id="conv"></output></div>
       <div class="presets">${m.presets.map(v => `<button onclick="setAmt(${v})">${m.localSign}${v.toLocaleString()}</button>`).join("")}</div>
     </div>
-    <div class="sec-h"><h2>行李清單</h2><span id="packed">已執 ${packed.length}／${H.pack.length}</span></div>
-    <div class="progress"><i id="pbar" style="width:${packed.length / H.pack.length * 100}%"></i></div>
-    ${H.pack.map((p, i) => `<label class="check"><input type="checkbox" ${packed.includes(i) ? "checked" : ""} onchange="togglePack(${i})"><span>${esc(p)}</span></label>`).join("")}
+    <div class="sec-h"><h2>行李清單</h2><span id="packed">已執 ${packed.length}／${packTotal()}</span></div>
+    <div class="progress"><i id="pbar" style="width:${packed.length / packTotal() * 100}%"></i></div>
+    ${packGroups().map((g, gi) => { const n = g.items.filter((_, i) => packed.includes(gi + ":" + i)).length;
+      return `<details class="pack-g" ${n < g.items.length ? "open" : ""}><summary>${g.group ? `<b>${esc(g.group)}</b>` : ""}<span id="pg${gi}">${n}／${g.items.length}</span></summary>${g.note ? `<p class="pack-note">${esc(g.note)}</p>` : ""}
+      ${g.items.map((p, i) => `<label class="check"><input type="checkbox" ${packed.includes(gi + ":" + i) ? "checked" : ""} onchange="togglePack('${gi}:${i}')"><span>${esc(p)}</span></label>`).join("")}</details>`; }).join("")}
     <button class="btn lock-btn" onclick="lockTrip()">鎖上行程（此裝置需重新輸入密碼）</button>
   </div>`;
 }
@@ -545,9 +556,12 @@ function toggleOpen(k) { open = open === k ? null : k; render(true); }
 function setFilter(k) { filter = k; open = null; render(true); }
 let st; function searchSoon() { clearTimeout(st); st = setTimeout(() => { const s = $(".search input"), pos = s.selectionStart; render(true); const n = $(".search input"); n.focus(); n.setSelectionRange(pos, pos); }, 200); }
 function toggleDone(date, i) { const k = "done:" + date, s = store.get(k) || []; store.set(k, s.includes(i) ? s.filter(x => x !== i) : [...s, i]); render(true); }
-function togglePack(i) {
-  const s = store.get("pack") || [], n = s.includes(i) ? s.filter(x => x !== i) : [...s, i]; store.set("pack", n);
-  $("#packed").textContent = `已執 ${n.length}／${TRIP.help.pack.length}`; $("#pbar").style.width = n.length / TRIP.help.pack.length * 100 + "%";
+const packGroups = () => { const p = TRIP.help.pack || []; return p.length && typeof p[0] === "object" ? p : [{ group: "", items: p }]; };
+const packTotal = () => packGroups().reduce((s, g) => s + g.items.length, 0) || 1;
+function togglePack(k) {
+  const s = store.get("pack2") || [], n = s.includes(k) ? s.filter(x => x !== k) : [...s, k]; store.set("pack2", n);
+  $("#packed").textContent = `已執 ${n.length}／${packTotal()}`; $("#pbar").style.width = n.length / packTotal() * 100 + "%";
+  const gi = k.split(":")[0], g = packGroups()[gi]; $("#pg" + gi).textContent = `${g.items.filter((_, i) => n.includes(gi + ":" + i)).length}／${g.items.length}`;
 }
 function conv() { const v = Number($("#amt").value || 0); $("#conv").innerHTML = `<small>${esc(TRIP.money.home)}</small>${(v / TRIP.money.perHome).toFixed(v / TRIP.money.perHome < 100 ? 1 : 0)}`; }
 function setAmt(v) { $("#amt").value = v; conv(); }
