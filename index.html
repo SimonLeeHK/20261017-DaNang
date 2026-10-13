@@ -233,11 +233,9 @@ nav button[aria-current=page] { background:var(--ink); color:var(--bg); }
   .intro .orb { animation:fade 1.4s ease-out both; }
   .intro .next { animation:rise .7s .25s cubic-bezier(.2,.7,.2,1) both; }
   .pulse { animation:pulse 2s infinite; }
-  .panel { animation:open .18s ease-out; }
 }
 @keyframes rise { from { opacity:0; transform:translateY(24px); } }
 @keyframes fade { from { opacity:0; } }
-@keyframes open { from { opacity:0; transform:translateY(-4px); } }
 @keyframes pulse { 0% { box-shadow:0 0 0 0 rgba(207,59,38,.55); } 70%,100% { box-shadow:0 0 0 9px rgba(207,59,38,0); } }
 
 /* ── Lock screen ── */
@@ -542,23 +540,44 @@ function viewHelp() {
 /* ── Behaviour ── */
 const VIEWS = { day: viewDay, places: viewPlaces, wallet: viewWallet, help: viewHelp };
 const TABS = [["day", "今日", "day"], ["places", "地點", "pin"], ["wallet", "票夾", "ticket"], ["help", "求助", "help"]];
-function render(keep, anchor) {
-  const y = scrollY, a = anchor && $(`[onclick="toggleOpen('${anchor}')"]`), top = a && a.getBoundingClientRect().top;
+function render(keep) {
+  const y = scrollY;
   $("#view").innerHTML = VIEWS[tab]();
   $("#nav").innerHTML = TABS.map(([k, l, i]) => `<button ${k === tab ? 'aria-current="page"' : ""} onclick="setTab('${k}')">${ic(i, 22)}${l}</button>`).join("");
   if (tab === "help") conv();
   const cur = $(".days [aria-current]"), strip = cur && cur.parentElement;
   if (cur) strip.scrollLeft = cur.offsetLeft - strip.offsetLeft - (strip.clientWidth - cur.offsetWidth) / 2;
   scrollTo(0, keep ? y : 0);
-  const b = a && $(`[onclick="toggleOpen('${anchor}')"]`);
-  if (b) scrollBy(0, b.getBoundingClientRect().top - top);
 }
+// Update only the DOM nodes that changed, so nothing is redrawn or re-animated.
+function morph(old, nu) {
+  if (old.nodeType !== nu.nodeType || old.nodeName !== nu.nodeName) return old.replaceWith(nu);
+  if (old.nodeType !== 1) { if (old.nodeValue !== nu.nodeValue) old.nodeValue = nu.nodeValue; return; }
+  if (old.isEqualNode(nu)) return;
+  for (const { name } of [...old.attributes]) if (!nu.hasAttribute(name)) old.removeAttribute(name);
+  for (const { name, value } of [...nu.attributes]) if (old.getAttribute(name) !== value) old.setAttribute(name, value);
+  const a = [...old.childNodes], b = [...nu.childNodes];
+  b.forEach((n, i) => a[i] ? morph(a[i], n) : old.appendChild(n));
+  a.slice(b.length).forEach(n => n.remove());
+}
+function update() { const v = $("#view"), t = v.cloneNode(false); t.innerHTML = VIEWS[tab](); morph(v, t); }
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 function setTab(t) { tab = t; open = null; document.body.classList.remove("intro"); render(); }
 function goDay(i) { dayIdx = i; open = null; document.body.classList.remove("intro"); render(true); }
-function toggleOpen(k) { open = open === k ? null : k; render(true, k); }
+function toggleOpen(k) {
+  const sel = `[onclick="toggleOpen('${k}')"]`, btn = $(sel), top = btn.getBoundingClientRect().top;
+  open = open === k ? null : k; update();
+  scrollBy(0, btn.getBoundingClientRect().top - top);
+  const p = btn.nextElementSibling;
+  if (open === k && p && !reduceMotion.matches) {
+    const cs = getComputedStyle(p), to = { height: cs.height, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom, opacity: 1 };
+    p.style.overflow = "hidden";
+    p.animate([{ height: "0px", paddingTop: "0px", paddingBottom: "0px", opacity: 0 }, to], { duration: 240, easing: "cubic-bezier(.2,.7,.2,1)" }).onfinish = () => p.style.overflow = "";
+  }
+}
 function setFilter(k) { filter = k; open = null; render(true); }
 let st; function searchSoon() { clearTimeout(st); st = setTimeout(() => { const s = $(".search input"), pos = s.selectionStart; render(true); const n = $(".search input"); n.focus(); n.setSelectionRange(pos, pos); }, 200); }
-function toggleDone(date, i) { const k = "done:" + date, s = store.get(k) || []; store.set(k, s.includes(i) ? s.filter(x => x !== i) : [...s, i]); render(true); }
+function toggleDone(date, i) { const k = "done:" + date, s = store.get(k) || []; store.set(k, s.includes(i) ? s.filter(x => x !== i) : [...s, i]); update(); }
 const packGroups = () => { const p = TRIP.help.pack || []; return p.length && typeof p[0] === "object" ? p : [{ group: "", items: p }]; };
 const packTotal = () => packGroups().reduce((s, g) => s + g.items.length, 0) || 1;
 function togglePack(k) {
