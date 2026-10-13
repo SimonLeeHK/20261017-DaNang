@@ -48,7 +48,7 @@ Always use the home-screen icon. Ticks and the packing list are stored separatel
 - `lang` sets the language name, the "take me here" sentence and the "booking number" word.
 - `money.presets` are the quick amounts in the converter.
 - `skyline` picks a drawing per city: `coast` (bridge, Ferris wheel, palms) or `lanterns` (old town, lanterns).
-- Places with `kind: "beauty"` appear under the 美甲 filter. Places not used in any day show 未排入行程.
+- Places with `kind: "beauty"` appear under the 美甲 filter, `cafe` under 咖啡 and `music` under 音樂. A filter chip only shows if at least one place has that kind. Places not used in any day show 未排入行程.
 - Tickets with `kind: "food"` go into 票夾 → 餐廳訂位. Optional `ask`/`en` set the sentence shown above the booking name.
 - Set `hotel: null` on the last day to hide the "tonight's hotel" card.
 
