@@ -1,5 +1,5 @@
 // Bump VERSION whenever you change any file, so phones pick up the update.
-const VERSION = "v8";
+const VERSION = "v9";
 const PREFIX = "dn26-"; // unique per trip: all your trips share one github.io origin
 const CACHE = PREFIX + VERSION;
 const FONTS = PREFIX + "fonts";
